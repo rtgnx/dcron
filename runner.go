@@ -39,8 +39,20 @@ func (r Runner) createContainer(job JobSpec) (string, error) {
 
 	log.Printf("Creating Container for Job %s", job.Name)
 
+	commands := make([]string, 0)
+	for _, cmd := range job.Commands {
+		if len(commands) > 0 {
+			commands = append(commands, ";")
+		}
+		commands = append(commands, strings.Split(cmd, " ")...)
+	}
+
 	container, err := c.ContainerCreate(
-		context.Background(), &container.Config{}, &container.HostConfig{}, nil, nil, job.dockerSafeName())
+		context.Background(), &container.Config{
+			Image: job.Image,
+			Env:   job.envPairs(),
+			Cmd:   commands,
+		}, &container.HostConfig{}, nil, nil, job.dockerSafeName())
 
 	return container.ID, err
 }
