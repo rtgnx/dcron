@@ -14,8 +14,8 @@ type Scheduler struct {
 	Jobs   []JobSpec
 	Logs   map[string]io.Reader
 	cron   *cron.Cron
-	wg     sync.WaitGroup
 	runner Runner
+	wg     sync.WaitGroup
 }
 
 // Init Scheduler
@@ -33,20 +33,16 @@ func (scheduler *Scheduler) Init() error {
 }
 func (scheduler *Scheduler) scheduleJob(job JobSpec) error {
 	log.Printf("Scheduling %s [%s]", job.Name, job.CronExpr)
-	scheduler.wg.Add(1)
 
 	_, err := scheduler.cron.AddFunc(job.CronExpr, func() {
-		scheduler.scheduleJob(job)
 
 		if err := scheduler.runner.Run(job); err != nil {
 			log.Println(err.Error())
 		}
 
-		scheduler.wg.Done()
 	})
 
 	if err != nil {
-		scheduler.wg.Done()
 		return err
 	}
 
@@ -65,7 +61,4 @@ func (scheduler *Scheduler) Start() {
 			continue
 		}
 	}
-
-	defer scheduler.cron.Stop()
-	scheduler.wg.Wait()
 }

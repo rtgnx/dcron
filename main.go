@@ -3,7 +3,6 @@ package main
 import (
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"path"
 
@@ -25,7 +24,7 @@ func main() {
 	app.Run(os.Args)
 
 	e.GET("/api/jobs", getJobs)
-	e.Start(":80")
+	e.Start(":8080")
 }
 
 func cmdRun(cmd *cli.Cmd) {
