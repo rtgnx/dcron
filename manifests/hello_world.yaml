@@ -1,0 +1,7 @@
+name: "Hello World Job"
+image: "busybox"
+commands:
+  - "echo \"$MESSAGE\"" 
+environment:
+  MESSAGE: "Hello, World!"
+cron: "0 * * * * *"
