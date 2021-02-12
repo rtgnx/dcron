@@ -3,15 +3,18 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path"
 
 	cli "github.com/jawher/mow.cli"
+	"github.com/labstack/echo"
 )
 
 var (
 	app       = cli.App("dcron", "Dockerized Cron")
 	scheduler Scheduler
+	e         = echo.New()
 )
 
 func main() {
@@ -20,6 +23,9 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 	app.Run(os.Args)
+
+	e.GET("/api/jobs", getJobs)
+	e.Start(":80")
 }
 
 func cmdRun(cmd *cli.Cmd) {
