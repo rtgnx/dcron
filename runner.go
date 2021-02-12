@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
+	"os"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -12,8 +15,27 @@ import (
 // Runner runs JobSpec on docker
 type Runner client.Client
 
+func (r Runner) pullImage(name string) error {
+	c := client.Client(r)
+	rd, err := c.ImagePull(context.Background(), name, types.ImagePullOptions{})
+
+	fd, _ := os.Open(os.DevNull)
+
+	io.Copy(fd, rd)
+
+	defer rd.Close()
+
+	return err
+}
+
 func (r Runner) createContainer(job JobSpec) (string, error) {
 	c := client.Client(r)
+
+	log.Printf("Ensuring image: %s is present", job.Image)
+
+	if err := r.pullImage(job.Image); err != nil {
+		return "", err
+	}
 
 	log.Printf("Creating Container for Job %s", job.Name)
 
