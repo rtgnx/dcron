@@ -1,0 +1,10 @@
+version: '2.1'
+services:
+  dcron:
+    image: rg.nl-ams.scw.cloud/revlabs/dcron
+    build: .
+    container_name: dcron
+    hostname: dcron
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
