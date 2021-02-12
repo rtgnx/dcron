@@ -31,6 +31,27 @@ func (scheduler *Scheduler) Init() error {
 	scheduler.runner = Runner(*cli)
 	return nil
 }
+func (scheduler *Scheduler) scheduleJob(job JobSpec) error {
+	log.Printf("Scheduling %s [%s]", job.Name, job.CronExpr)
+	scheduler.wg.Add(1)
+
+	_, err := scheduler.cron.AddFunc(job.CronExpr, func() {
+		scheduler.scheduleJob(job)
+
+		if err := scheduler.runner.Run(job); err != nil {
+			log.Println(err.Error())
+		}
+
+		scheduler.wg.Done()
+	})
+
+	if err != nil {
+		scheduler.wg.Done()
+		return err
+	}
+
+	return nil
+}
 
 // Start Scheduler
 func (scheduler *Scheduler) Start() {
@@ -38,22 +59,11 @@ func (scheduler *Scheduler) Start() {
 	scheduler.cron.Start()
 
 	for _, job := range scheduler.Jobs {
-		log.Printf("Scheduling %s [%s]", job.Name, job.CronExpr)
-		_, err := scheduler.cron.AddFunc(job.CronExpr, func() {
 
-			if err := scheduler.runner.Run(job); err != nil {
-				log.Println(err.Error())
-			}
-
-			scheduler.wg.Done()
-		})
-
-		if err != nil {
+		if err := scheduler.scheduleJob(job); err != nil {
 			log.Println(err.Error())
 			continue
 		}
-
-		scheduler.wg.Add(1)
 	}
 
 	defer scheduler.cron.Stop()
