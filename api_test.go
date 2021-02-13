@@ -28,7 +28,6 @@ func TestGetJobs(t *testing.T) {
 	// Assertions
 	if assert.NoError(t, getJobs(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
-		log.Println(rec.Body.String())
 		jobs := make([]JobSpec, 0)
 
 		err := json.Unmarshal(rec.Body.Bytes(), &jobs)
