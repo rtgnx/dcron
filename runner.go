@@ -52,7 +52,7 @@ func (r Runner) createContainer(job JobSpec) (string, error) {
 			Image: job.Image,
 			Env:   job.envPairs(),
 			Cmd:   commands,
-		}, &container.HostConfig{}, nil, nil, job.dockerSafeName())
+		}, &container.HostConfig{}, nil, nil, "")
 
 	return container.ID, err
 }
