@@ -3,13 +3,18 @@ type: docker
 name: default
 
 steps:
-- name: backend
+- name: Build and Test
   image: golang
   commands:
   - go build
   - go test
 
-- name: build-image
+- name: Build image and publish
   image: plugins/docker
   settings:
     repo: rg.nl-ams.scw.cloud/revlabs/dcron
+    username: nologin
+    password:
+      from_secret: SCW_SECRET_KEY
+    registry: rg.nl-ams.scw.cloud/revlabs
+    when: master
