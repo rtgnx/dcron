@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"log"
 	"sync"
 
@@ -12,7 +11,6 @@ import (
 // Scheduler for cron jobs
 type Scheduler struct {
 	Jobs   []JobSpec
-	Logs   map[string]io.Reader
 	cron   *cron.Cron
 	runner Runner
 	wg     sync.WaitGroup
@@ -20,7 +18,6 @@ type Scheduler struct {
 
 // Init Scheduler
 func (scheduler *Scheduler) Init() error {
-	scheduler.Logs = make(map[string]io.Reader)
 	scheduler.cron = cron.New(cron.WithSeconds())
 	cli, err := client.NewEnvClient()
 
@@ -31,6 +28,7 @@ func (scheduler *Scheduler) Init() error {
 	scheduler.runner = Runner(*cli)
 	return nil
 }
+
 func (scheduler *Scheduler) scheduleJob(job JobSpec) error {
 	log.Printf("Scheduling %s [%s]", job.Name, job.CronExpr)
 

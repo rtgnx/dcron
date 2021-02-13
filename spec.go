@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -17,6 +18,13 @@ type JobSpec struct {
 	Labels      map[string]string `yaml:"labels,omitempty" json:"labels,omitempty"`
 	Commands    []string          `yaml:"commands" json:"commands,omitempty"`
 	CronExpr    string            `yaml:"cron" json:"cron_expr"`
+}
+
+// Job type definition
+type Job struct {
+	Spec    JobSpec
+	History []string
+	Logs    map[string]io.Reader
 }
 
 func (job JobSpec) envPairs() []string {
