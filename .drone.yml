@@ -8,3 +8,12 @@ steps:
   commands:
   - go build
   - go test
+
+- name: build test image
+  image: docker:latest
+  volumes:
+    - name: docker_sock
+      path: /var/run/docker.sock
+  commands:
+    - docker build --no-cache -t rg.nl-ams.scw.cloud/revlabs/dcron:latest -f Dockerfile .
+    - docker push rg.nl-ams.scw.cloud/revlabs/dcron:latest
