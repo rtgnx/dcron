@@ -36,14 +36,8 @@ func (job JobSpec) envPairs() []string {
 	return env
 }
 
-func (job *JobSpec) fromFile(filePath string) error {
-	fd, err := os.Open(filePath)
-
-	if err != nil {
-		return err
-	}
-
-	b, err := ioutil.ReadAll(fd)
+func (job *JobSpec) fromReader(r io.Reader) error {
+	b, err := ioutil.ReadAll(r)
 
 	if err != nil {
 		return err
@@ -51,6 +45,17 @@ func (job *JobSpec) fromFile(filePath string) error {
 
 	return yaml.Unmarshal(b, job)
 }
+
+func (job *JobSpec) fromFile(filePath string) error {
+	fd, err := os.Open(filePath)
+
+	if err != nil {
+		return err
+	}
+
+	return job.fromReader(fd)
+}
+
 func (job *JobSpec) dockerSafeName() string {
 	return strings.Replace(job.Name, " ", "_", -1)
 }
