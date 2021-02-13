@@ -11,12 +11,12 @@ import (
 
 // JobSpec for cron jobs
 type JobSpec struct {
-	Name        string            `yaml:"name"`
-	Image       string            `yaml:"image"`
-	Environment map[string]string `yaml:"environment,omitempty"`
-	Labels      map[string]string `yaml:"labels,omitempty"`
-	Commands    []string          `yaml:"commands"`
-	CronExpr    string            `yaml:"cron"`
+	Name        string            `yaml:"name" json:"name"`
+	Image       string            `yaml:"image" json:"image"`
+	Environment map[string]string `yaml:"environment,omitempty" json:"environment,omitempty"`
+	Labels      map[string]string `yaml:"labels,omitempty" json:"labels,omitempty"`
+	Commands    []string          `yaml:"commands" json:"commands,omitempty"`
+	CronExpr    string            `yaml:"cron" json:"cron_expr"`
 }
 
 func (job JobSpec) envPairs() []string {
