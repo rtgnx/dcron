@@ -14,6 +14,8 @@ var (
 	app       = cli.App("dcron", "Dockerized Cron")
 	scheduler Scheduler
 	e         = echo.New()
+	s3Bucket  = os.Getenv("S3_BUCKET")
+	s3Prefix  = os.Getenv("S3_PREFIX")
 )
 
 func main() {
@@ -30,27 +32,40 @@ func main() {
 func cmdRun(cmd *cli.Cmd) {
 	var (
 		manifests = cmd.StringOpt("manifests", "./manifests", "Path to manifests directory")
+		useS3     = cmd.BoolOpt("use-s3", false, "Use S3 bucket as source of manifests file")
 	)
 
 	// Run this function when the command is invoked
 	cmd.Action = func() {
 		cwd, _ := os.Getwd()
-		_, err := os.Stat(path.Join(cwd, *manifests))
-
-		if os.IsNotExist(err) {
+		if *useS3 {
+			fromObjectStorage()
+		} else {
+			fromLocalStorage(path.Join(cwd, *manifests))
 		}
-
-		fileList, _ := ioutil.ReadDir(path.Join(cwd, *manifests))
-
-		for _, info := range fileList {
-			spec := new(JobSpec)
-			if err := spec.fromFile(path.Join(cwd, *manifests, info.Name())); err != nil {
-				log.Fatalln(err.Error())
-			}
-			scheduler.Jobs = append(scheduler.Jobs, *spec)
-		}
-
 		scheduler.Start()
+	}
 
+}
+
+func fromObjectStorage() (err error) {
+	scheduler.Jobs, err = ReadJobSpecs(s3Bucket, s3Prefix)
+	return
+}
+
+func fromLocalStorage(rootPath string) {
+	_, err := os.Stat(rootPath)
+
+	if os.IsNotExist(err) {
+	}
+
+	fileList, _ := ioutil.ReadDir(rootPath)
+
+	for _, info := range fileList {
+		spec := new(JobSpec)
+		if err := spec.fromFile(path.Join(rootPath, info.Name())); err != nil {
+			log.Fatalln(err.Error())
+		}
+		scheduler.Jobs = append(scheduler.Jobs, *spec)
 	}
 }
