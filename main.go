@@ -8,7 +8,6 @@ import (
 
 	cli "github.com/jawher/mow.cli"
 	"github.com/labstack/echo"
-	"github.com/minio/minio-go"
 )
 
 var (
@@ -49,25 +48,9 @@ func cmdRun(cmd *cli.Cmd) {
 
 }
 
-func fromObjectStorage() {
-	s3, _ := MinioFromEnv()
-
-	if ok, err := s3.BucketExists(s3Bucket); err != nil || !ok {
-
-	}
-
-	done := make(chan struct{})
-	defer close(done)
-
-	for object := range s3.ListObjects(s3Bucket, s3Prefix, false, done) {
-		obj, _ := s3.GetObject(s3Bucket, path.Join(s3Prefix, object.Key), minio.GetObjectOptions{})
-		defer obj.Close()
-
-		spec := new(JobSpec)
-		if err := spec.fromReader(obj); err == nil {
-			scheduler.Jobs = append(scheduler.Jobs, *spec)
-		}
-	}
+func fromObjectStorage() (err error) {
+	scheduler.Jobs, err = ReadJobSpecs(s3Bucket, s3Prefix)
+	return
 }
 
 func fromLocalStorage(rootPath string) {
