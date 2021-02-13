@@ -17,4 +17,6 @@ steps:
     password:
       from_secret: SCW_SECRET_KEY
     registry: rg.nl-ams.scw.cloud/revlabs
-    when: master
+  when:
+    branch:
+      - master
