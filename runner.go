@@ -62,9 +62,16 @@ func (r Runner) startContainer(id string) error {
 	return c.ContainerStart(context.Background(), id, types.ContainerStartOptions{})
 }
 
-func (r Runner) containerWait(id string) {
+func (r Runner) containerWait(id string) error {
 	c := client.Client(r)
-	c.ContainerWait(context.Background(), id, container.WaitConditionNextExit)
+	okCh, errCh := c.ContainerWait(context.Background(), id, container.WaitConditionNextExit)
+
+	select {
+	case <-okCh:
+		return nil
+	case err := <-errCh:
+		return err
+	}
 }
 
 func (r Runner) removeContainer(id string, force bool) error {
