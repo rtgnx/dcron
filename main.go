@@ -39,7 +39,9 @@ func cmdRun(cmd *cli.Cmd) {
 	cmd.Action = func() {
 		cwd, _ := os.Getwd()
 		if *useS3 {
-			fromObjectStorage()
+			if err := fromObjectStorage(); err != nil {
+				log.Fatalln(err.Error())
+			}
 		} else {
 			fromLocalStorage(path.Join(cwd, *manifests))
 		}

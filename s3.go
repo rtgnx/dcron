@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 	"path"
 
@@ -13,10 +14,15 @@ func MinioFromEnv() (*minio.Client, error) {
 }
 
 // ReadJobSpecs from S3
-func ReadJobSpecs(bucket, prefix string) ([]JobSpec, error) {
-	jobs := make([]JobSpec, 0)
+func ReadJobSpecs(bucket, prefix string) (jobs []JobSpec, err error) {
+	log.Printf("Reading manifests from %s:%s", bucket, prefix)
+	jobs = make([]JobSpec, 0)
 
-	s3, _ := MinioFromEnv()
+	var s3 *minio.Client
+
+	if s3, err = MinioFromEnv(); err != nil {
+		return
+	}
 
 	if ok, err := s3.BucketExists(bucket); err != nil || !ok {
 		return jobs, err
